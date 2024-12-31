@@ -21,9 +21,9 @@ app.post('/users', async (req, res) => {
     console.log("Dados recebidos para criação de usuário:", { name, password });
 
     try {
-        // Verificar se o nome de usuário já existe
-        const existingUser = await prisma.user.findUnique({
-            where: { name },
+        // Usar findFirst para buscar qualquer campo, já que "name" não é único
+        const existingUser = await prisma.user.findFirst({
+            where: { name },  // Buscando pelo nome, mas sem exigir que seja único
         });
 
         if (existingUser) {
@@ -33,11 +33,11 @@ app.post('/users', async (req, res) => {
         const newUser = await prisma.user.create({
             data: { name, password },
         });
-        
+
         res.status(201).json(newUser); // Criando o usuário e retornando a resposta
     } catch (error) {
-        console.error("Erro ao criar usuário:", error);
-        res.status(500).json({ success: false, message: "Erro ao criar usuário." });
+        console.error("Erro ao criar usuário:", error.message);  // Log detalhado do erro
+        res.status(500).json({ success: false, message: "Erro ao criar usuário.", error: error.message });  // Envia a mensagem de erro
     }
 });
 
