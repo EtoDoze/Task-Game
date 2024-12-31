@@ -18,12 +18,10 @@ app.get('/users', async (req, res) => {
 // Rota para adicionar um usuário
 app.post('/users', async (req, res) => {
     const { name, password } = req.body;
-    console.log("Dados recebidos para criação de usuário:", { name, password });
 
     try {
-        // Usar findFirst para buscar qualquer campo, já que "name" não é único
         const existingUser = await prisma.user.findFirst({
-            where: { name },  // Buscando pelo nome, mas sem exigir que seja único
+            where: { name }
         });
 
         if (existingUser) {
@@ -31,30 +29,35 @@ app.post('/users', async (req, res) => {
         }
 
         const newUser = await prisma.user.create({
-            data: { name, password },
+            data: {
+                name,
+                password,
+                exp: 0,  // Inicializando com 0 de XP
+                level: 0,  // Inicializando com o nível 1
+                ranking: 'noob'  // Inicializando com o ranking 'noob'
+            }
         });
 
-        res.status(201).json(newUser); // Criando o usuário e retornando a resposta
+        res.status(201).json(newUser);
     } catch (error) {
-        console.error("Erro ao criar usuário:", error.message);  // Log detalhado do erro
-        res.status(500).json({ success: false, message: "Erro ao criar usuário.", error: error.message });  // Envia a mensagem de erro
+        console.error("Erro ao criar usuário:", error.message);
+        res.status(500).json({ success: false, message: "Erro ao criar usuário.", error: error.message });
     }
 });
+
 
 // Rota de login
 // Rota de login
 app.post("/login", async (req, res) => {
     const { name, password } = req.body;
-    console.log("Dados recebidos:", { name, password });
 
     try {
         const usuario = await prisma.user.findFirst({
             where: { name, password },
         });
-        console.log("Resultado da busca:", usuario);
 
         if (usuario) {
-            // Envia os dados do usuário (exp, level, ranking)
+            // Certifique-se de que está retornando exp, level e ranking
             res.json({
                 success: true,
                 message: "Login bem-sucedido!",
@@ -71,6 +74,7 @@ app.post("/login", async (req, res) => {
     }
 });
 
+
 // Rota para atualizar os dados do usuário
 app.put("/updateUserData", async (req, res) => {
     const { name, exp, level, ranking } = req.body;
@@ -78,7 +82,11 @@ app.put("/updateUserData", async (req, res) => {
     try {
         const updatedUser = await prisma.user.update({
             where: { name: name },
-            data: { exp, level, ranking }
+            data: {
+                exp,  // Atualiza o XP
+                level,  // Atualiza o nível
+                ranking  // Atualiza o ranking
+            }
         });
 
         res.json(updatedUser);
@@ -87,6 +95,7 @@ app.put("/updateUserData", async (req, res) => {
         res.status(500).json({ success: false, message: "Erro ao atualizar os dados." });
     }
 });
+
 
 
 // Iniciar o servidor

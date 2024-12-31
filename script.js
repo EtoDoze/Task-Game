@@ -1,203 +1,83 @@
-/*
-function mostrar(){
-    const username = document.getElementById("nome").value;
-    const password = document.getElementById("senha").value;
-    alert(`Seu nome: ${username}, sua senha é: ${password}`);
-}
-*/
-let taskList = [];
-var level = 1;
-var exp = 0;
-var ranking = "noob";
-
-document.getElementById("formulario").addEventListener("submit", async (e) => {
-    e.preventDefault();
+// Função para validar login
+document.getElementById("formulario").addEventListener("submit", async function(event) {
+    event.preventDefault(); // Impede o envio do formulário e o recarregamento da página
 
     const username = document.getElementById("nome").value;
     const password = document.getElementById("senha").value;
-
-    const response = await fetch("https://task-game.onrender.com/login", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name: username, password }),
-    });
-
-    const result = await response.json();
-    if (result.success) {
-        // Salva os dados recebidos do login (exp, level, ranking)
-        localStorage.setItem("user", JSON.stringify({
-            name: username,
-            exp: result.exp,
-            level: result.level,
-            ranking: result.ranking
-        }));
-
-        document.getElementById("result").innerText = "Login bem-sucedido!";
-        window.location.href = "game.html";  // Redireciona para a página de jogo
-    } else {
-        document.getElementById("result").innerText = "Login falhou: " + result.message;
-    }
-});
-
-window.addEventListener("load", () => {
-    const user = JSON.parse(localStorage.getItem("user"));
     
-    if (user) {
-        document.getElementById("lvl").innerText = user.level;
-        document.getElementById("xp").innerText = user.exp;
-        document.getElementById("rank").innerText = user.ranking;
-    } else {
-        window.location.href = "index.html";  // Redireciona de volta se o usuário não estiver logado
-    }
-});
+    // Aqui você pode ajustar a URL para o endpoint correto da sua API de login
+    try {
+        const response = await fetch("https://task-game.onrender.com/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ name: username, password }),
+        });
 
+        const result = await response.json();
 
+        // Verifique se o login foi bem-sucedido
+        if (result.success) {
+            // Armazenar os dados do usuário no localStorage
+            localStorage.setItem("user", JSON.stringify({
+                name: username,
+                exp: result.exp,
+                level: result.level,
+                ranking: result.ranking
+            }));
 
-
-function addTask() {
-    const taskInput = document.getElementById('taskInput');
-    const taskText = taskInput.value.trim();
-
-    if (taskText === "") {
-        alert("Digite uma tarefa!");
-        return;
-    }
-
-    if (taskList.length >= 5) {
-        alert("Você pode adicionar no máximo 5 tarefas.");
-        return;
-    }
-
-    taskList.push({ text: taskText, isChecked: false, isEditing: false });
-    taskInput.value = "";
-    renderTasks();
-}
-
-
-function renderTasks() {
-    const taskListElement = document.getElementById('taskList');
-    taskListElement.innerHTML = '';
-
-    taskList.forEach((task, index) => {
-        const taskItem = document.createElement('li');
-
-        // Checkbox para marcar a tarefa como concluída
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.checked = task.isChecked; // Verifica se a tarefa está marcada
-        checkbox.addEventListener('change', () => handleCheckboxChange(checkbox, index));
-        taskItem.appendChild(checkbox);
-
-        // Renderiza o conteúdo da tarefa, se não estiver em edição
-        if (task.isEditing) {
-            const input = document.createElement('input');
-            input.type = "text";
-            input.value = task.text;
-            input.onblur = () => saveTask(index, input.value); // Salva ao perder o foco
-            taskItem.appendChild(input);
+            // Redirecionar para o game.html
+            window.location.href = "game.html"; 
         } else {
-            const span = document.createElement('span');
-            span.textContent = task.text;
-            taskItem.appendChild(span);
-
-            // Botão de editar
-            const editButton = document.createElement('button');
-            editButton.textContent = "Alterar";
-            editButton.onclick = () => toggleEdit(index);
-            taskItem.appendChild(editButton);
+            // Se o login falhar, exibir a mensagem de erro
+            document.getElementById("result").innerText = "Login falhou: " + result.message;
         }
+    } catch (error) {
+        // Caso haja erro de conexão ou outro tipo de erro
+        document.getElementById("result").innerText = "Erro ao tentar fazer login. Tente novamente mais tarde.";
+        console.error(error); // Exibir o erro no console para depuração
+    }
+});
 
-        // Botão de excluir
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = "Excluir";
-        deleteButton.onclick = () => deleteTask(index);
-        taskItem.appendChild(deleteButton);
+function validateLogin(event) {
+    event.preventDefault(); // Evita o envio do formulário
 
-        taskListElement.appendChild(taskItem);
-    });
-}
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
 
-function handleCheckboxChange(checkbox, index) {
-    // Atualiza o estado da checkbox
-    taskList[index].isChecked = checkbox.checked;
+    // Verifica se o usuário existe no localStorage
+    const storedUser = JSON.parse(localStorage.getItem("user"));
 
-    if (checkbox.checked) {
-        exp += 10;  // Adiciona 10 de XP ao marcar a tarefa
+    if (storedUser && storedUser.username === username && storedUser.password === password) {
+        // Armazena dados do usuário na sessão e redireciona para o game.html
+        localStorage.setItem("user", JSON.stringify(storedUser));
+        window.location.href = "game.html";
     } else {
-        exp -= 10;  // Subtrai 10 de XP ao desmarcar a tarefa
+        alert("Usuário ou senha incorretos!");
     }
+}
 
-    if (exp >= 100) {
-        exp = 0;  // Reseta o XP
-        level++;  // Aumenta o nível
-    }
-
-    document.getElementById("xp").innerText = exp;
-    document.getElementById("lvl").innerText = level;
-    updateRanking();  // Atualiza o ranking
-
-    // Atualiza o ranking com base no level
-    function updateRanking() {
-        if (level >= 100) ranking = "god";
-        else if (level >= 50) ranking = "mestre";
-        else if (level >= 20) ranking = "lenda";
-        else if (level >= 10) ranking = "estudioso";
-        else ranking = "noob";
-
-        document.getElementById("rank").innerText = ranking;
-    }
-
-    // Envia os dados atualizados ao servidor
+// Função para carregar o nome do usuário e a saudação no game.html
+function loadUserData() {
     const user = JSON.parse(localStorage.getItem("user"));
-    fetch("https://task-game.onrender.com/updateUserData", {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            name: user.name,
-            exp: exp,
-            level: level,
-            ranking: ranking
-        })
-    }).then(response => response.json())
-      .then(data => {
-          console.log("Dados atualizados:", data);
-      });
-
-    renderTasks(); // Atualiza a interface com o estado das checkboxes
+    if (user) {
+        document.getElementById("userGreeting").innerText = `Bem-vindo, ${user.name}!`;
+    } else {
+        window.location.href = "index.html"; // Se o usuário não estiver logado, redireciona para a página de login
+    }
 }
 
-
-
-
-function toggleEdit(index) {
-    taskList[index].isEditing = !taskList[index].isEditing;
-    renderTasks();
+// Função de logout
+function logout() {
+    localStorage.removeItem("user"); // Remove o usuário da sessão
+    window.location.href = "index.html"; // Redireciona para a página de login
 }
 
-function saveTask(index, newText) {
-    taskList[index].text = newText.trim();
-    taskList[index].isEditing = false;
-    renderTasks();
+// Exemplo de como você pode usar a função de login:
+const loginForm = document.getElementById("loginForm");
+if (loginForm) {
+    loginForm.addEventListener("submit", validateLogin);
 }
 
-function deleteTask(index) {
-    taskList.splice(index, 1);
-    renderTasks();
-}
-
-
-function updateRanking() {
-    if (level >= 100) ranking = "god";
-    else if (level >= 50) ranking = "mestre";
-    else if (level >= 20) ranking = "lenda";
-    else if (level >= 10) ranking = "estudioso";
-    else ranking = "noob";
-    
-    document.getElementById("rank").innerText = ranking;
-}
-
-renderTasks();
+// A função `loadUserData()` será chamada no game.html para garantir que o usuário está logado e exibir suas informações.

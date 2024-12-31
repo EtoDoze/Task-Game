@@ -21,6 +21,153 @@
     <button id="but-task" onclick="addTask()">Adicionar Tarefa</button>
     <ul id="taskList"></ul>
     </main>
-    <script src="script.js" defer></script>
+    <script>
+        let taskList = [];
+        var level = 1;
+        var exp = 0;
+        var ranking = "noob";
+
+        window.addEventListener("load", () => {
+            const user = JSON.parse(localStorage.getItem("user"));
+            
+            if (user) {
+                // Carregar os dados do usuário
+                document.getElementById("lvl").innerText = user.level;
+                document.getElementById("xp").innerText = user.exp;
+                document.getElementById("rank").innerText = user.ranking;
+                
+                // Chama renderTasks agora que o DOM está carregado
+                renderTasks();
+            } else {
+                window.location.href = "index.html";  // Se o usuário não estiver logado, redireciona
+            }
+        });
+
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const taskText = taskInput.value.trim();
+
+            if (taskText === "") {
+                alert("Digite uma tarefa!");
+                return;
+            }
+
+            if (taskList.length >= 5) {
+                alert("Você pode adicionar no máximo 5 tarefas.");
+                return;
+            }
+
+            taskList.push({ text: taskText, isChecked: false, isEditing: false });
+            taskInput.value = "";
+            renderTasks();
+        }
+
+        function renderTasks() {
+            const taskListElement = document.getElementById('taskList');
+            taskListElement.innerHTML = '';
+
+            taskList.forEach((task, index) => {
+                const taskItem = document.createElement('li');
+
+                // Checkbox para marcar a tarefa como concluída
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = task.isChecked;
+                checkbox.addEventListener('change', () => handleCheckboxChange(checkbox, index));
+                taskItem.appendChild(checkbox);
+
+                // Renderiza o conteúdo da tarefa, se não estiver em edição
+                if (task.isEditing) {
+                    const input = document.createElement('input');
+                    input.type = "text";
+                    input.value = task.text;
+                    input.onblur = () => saveTask(index, input.value);
+                    taskItem.appendChild(input);
+                } else {
+                    const span = document.createElement('span');
+                    span.textContent = task.text;
+                    taskItem.appendChild(span);
+
+                    const editButton = document.createElement('button');
+                    editButton.textContent = "Alterar";
+                    editButton.onclick = () => toggleEdit(index);
+                    taskItem.appendChild(editButton);
+                }
+
+                // Botão de excluir
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = "Excluir";
+                deleteButton.onclick = () => deleteTask(index);
+                taskItem.appendChild(deleteButton);
+
+                taskListElement.appendChild(taskItem);
+            });
+        }
+
+        function handleCheckboxChange(checkbox, index) {
+            taskList[index].isChecked = checkbox.checked;
+
+            if (checkbox.checked) {
+                exp += 10; // Adiciona XP ao marcar a tarefa
+            } else {
+                exp -= 10; // Remove XP ao desmarcar
+            }
+
+            if (exp >= 100) {
+                exp = 0;
+                level++; // Aumenta o nível
+            }
+
+            document.getElementById("xp").innerText = exp;
+            document.getElementById("lvl").innerText = level;
+            updateRanking();
+
+            // Atualiza o ranking com base no level
+            function updateRanking() {
+                if (level >= 100) ranking = "god";
+                else if (level >= 50) ranking = "mestre";
+                else if (level >= 20) ranking = "lenda";
+                else if (level >= 10) ranking = "estudioso";
+                else ranking = "noob";
+
+                document.getElementById("rank").innerText = ranking;
+            }
+
+            const user = JSON.parse(localStorage.getItem("user"));
+            fetch("https://task-game.onrender.com/updateUserData", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name: user.name,
+                    exp: exp,
+                    level: level,
+                    ranking: ranking
+                })
+            }).then(response => response.json())
+              .then(data => {
+                  console.log("Dados atualizados:", data);
+              });
+
+            renderTasks(); // Atualiza a interface com o estado das checkboxes
+        }
+
+        function toggleEdit(index) {
+            taskList[index].isEditing = !taskList[index].isEditing;
+            renderTasks();
+        }
+
+        function saveTask(index, newText) {
+            taskList[index].text = newText.trim();
+            taskList[index].isEditing = false;
+            renderTasks();
+        }
+
+        function deleteTask(index) {
+            taskList.splice(index, 1);
+            renderTasks();
+        }
+    </script>
 </body>
 </html>

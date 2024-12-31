@@ -18,7 +18,7 @@ model User {
   name  String @unique
   password String
   exp      Int    @default(0)  // XP do usuário
-  level    Int    @default(1)  // Nível do usuário
+  level    Int    @default(0)  // Nível do usuário
   ranking  String @default("noob") // Ranking do usuário
 }
 
