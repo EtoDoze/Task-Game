@@ -7,10 +7,12 @@ const prisma = new PrismaClient();
 const cors = require("cors");
 app.use(cors());
 
-//const { exec } = require("child_process");//
+const { exec } = require("child_process");//
 
 // Executa as migrações no início do servidor
 const { execSync } = require("child_process");
+execSync("npx prisma migrate reset --force --skip-seed", { stdio: "inherit" });
+
 
 try {
     execSync("npx prisma migrate deploy", { stdio: "inherit" });
