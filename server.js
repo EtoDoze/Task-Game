@@ -7,6 +7,21 @@ const prisma = new PrismaClient();
 const cors = require("cors");
 app.use(cors());
 
+const { exec } = require("child_process");
+
+// Executa as migrações no início do servidor
+exec("npx prisma migrate deploy", (error, stdout, stderr) => {
+    if (error) {
+        console.error(`Erro ao aplicar migrações: ${error.message}`);
+        return;
+    }
+    if (stderr) {
+        console.error(`stderr: ${stderr}`);
+        return;
+    }
+    console.log(`Migrações aplicadas com sucesso: ${stdout}`);
+});
+
 app.use(express.json());  // Só uma vez
 
 // Rota para listar todos os usuários
