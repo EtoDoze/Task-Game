@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game!</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main>
+        <div class="status">
+        <h3>Level</h3>
+        <h3>XP</h3>
+        <h3>Ranking</h3>
+        <h4 id="lvl"></h4>
+        <h4 id="xp"></h4>
+        <h4 id="rank"></h4>
+    </div>
+    <h2>Lista de Tarefas</h2>
+    <input type="text" id="taskInput" placeholder="Digite uma tarefa" maxlength="100">
+    <button id="but-task" onclick="addTask()">Adicionar Tarefa</button>
+    <ul id="taskList"></ul>
+    </main>
+    <script src="script.js" defer></script>
+</body>
+</html>

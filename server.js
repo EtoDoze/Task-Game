@@ -42,6 +42,7 @@ app.post('/users', async (req, res) => {
 });
 
 // Rota de login
+// Rota de login
 app.post("/login", async (req, res) => {
     const { name, password } = req.body;
     console.log("Dados recebidos:", { name, password });
@@ -53,7 +54,14 @@ app.post("/login", async (req, res) => {
         console.log("Resultado da busca:", usuario);
 
         if (usuario) {
-            res.json({ success: true, message: "Login bem-sucedido!" });
+            // Envia os dados do usuário (exp, level, ranking)
+            res.json({
+                success: true,
+                message: "Login bem-sucedido!",
+                exp: usuario.exp,
+                level: usuario.level,
+                ranking: usuario.ranking
+            });
         } else {
             res.json({ success: false, message: "Nome ou senha inválidos." });
         }
@@ -62,6 +70,24 @@ app.post("/login", async (req, res) => {
         res.status(500).json({ success: false, message: "Erro interno no servidor." });
     }
 });
+
+// Rota para atualizar os dados do usuário
+app.put("/updateUserData", async (req, res) => {
+    const { name, exp, level, ranking } = req.body;
+
+    try {
+        const updatedUser = await prisma.user.update({
+            where: { name: name },
+            data: { exp, level, ranking }
+        });
+
+        res.json(updatedUser);
+    } catch (error) {
+        console.error("Erro ao atualizar dados do usuário:", error);
+        res.status(500).json({ success: false, message: "Erro ao atualizar os dados." });
+    }
+});
+
 
 // Iniciar o servidor
 const PORT = 3000;
