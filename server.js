@@ -18,8 +18,27 @@ app.get('/users', async (req, res) => {
 // Rota para adicionar um usuário
 app.post('/users', async (req, res) => {
     const { name, password } = req.body;
-    const newUser = await prisma.user.create({ data: { name, password } });
-    res.json(newUser);
+    console.log("Dados recebidos para criação de usuário:", { name, password });
+
+    try {
+        // Verificar se o nome de usuário já existe
+        const existingUser = await prisma.user.findUnique({
+            where: { name },
+        });
+
+        if (existingUser) {
+            return res.status(400).json({ success: false, message: "Usuário já existe." });
+        }
+
+        const newUser = await prisma.user.create({
+            data: { name, password },
+        });
+        
+        res.status(201).json(newUser); // Criando o usuário e retornando a resposta
+    } catch (error) {
+        console.error("Erro ao criar usuário:", error);
+        res.status(500).json({ success: false, message: "Erro ao criar usuário." });
+    }
 });
 
 // Rota de login
