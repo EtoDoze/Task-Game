@@ -14,11 +14,10 @@ datasource db {
 }
 
 model User {
-  id    Int     @id @default(autoincrement())
-  name  String @unique
+  id       Int    @id @default(autoincrement())
+  name     String
   password String
-  exp      Int    @default(0)  // XP do usuário
-  level    Int    @default(0)  // Nível do usuário
-  ranking  String @default("noob") // Ranking do usuário
+  exp      Int    @default(0)
+  level    Int    @default(0)
+  ranking  String @default("noob")
 }
-
