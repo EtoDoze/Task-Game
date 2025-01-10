@@ -75,6 +75,11 @@ p{
     height: 40px;
 }
 
+#result{
+    color: red;
+    font-weight: bold;
+}
+
 #taskInput{
     background: whitesmoke;
     border-radius: 5px;

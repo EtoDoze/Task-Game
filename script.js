@@ -40,6 +40,36 @@ document.getElementById("formulario").addEventListener("submit", async function(
     }
 });
 
+
+
+const userData = {
+    username,
+    password
+  };
+
+document.getElementById('create').addEventListener('click', async () => {
+    try {
+      // Envia uma requisição POST para o servidor
+      const response = await fetch('https://task-game.onrender.com/users', {
+        method: 'POST', // Método HTTP
+        headers: { 'Content-Type': 'application/json' }, // Cabeçalhos
+        body: JSON.stringify(userData), // Converte os dados do usuário para JSON
+      });
+  
+      // Processa a resposta do servidor
+      const resultado = await response.json();
+      if (response.ok) {
+        document.getElementById("result").innerText = "Deu certo: " + resultado.message; // Exibe mensagem de sucesso
+      } else {
+        document.getElementById("result").innerText = "Create falhou: " + result.message; // Exibe mensagem de erro
+      }
+    } catch (error) {
+      console.error('Erro na requisição:', error);
+      document.getElementById("result").innerText = "Erro ao conectar com o servidor";
+    }
+  });
+
+
 function validateLogin(event) {
     event.preventDefault(); // Evita o envio do formulário
 
