@@ -42,33 +42,35 @@ document.getElementById("formulario").addEventListener("submit", async function(
 
 
 
-const userData = {
-    username,
-    password
-  };
+// Função para criar um novo usuário
+document.getElementById("create").addEventListener("click", async function () {
+    const username = document.getElementById("nome").value;
+    const password = document.getElementById("senha").value;
 
-document.getElementById('create').addEventListener('click', async () => {
-    try {
-      // Envia uma requisição POST para o servidor
-      const response = await fetch('https://task-game.onrender.com/users', {
-        method: 'POST', // Método HTTP
-        headers: { 'Content-Type': 'application/json' }, // Cabeçalhos
-        body: JSON.stringify(userData), // Converte os dados do usuário para JSON
-      });
-  
-      // Processa a resposta do servidor
-      const resultado = await response.json();
-      if (response.ok) {
-        document.getElementById("result").innerText = "Deu certo: " + resultado.message; // Exibe mensagem de sucesso
-      } else {
-        document.getElementById("result").innerText = "Create falhou: " + result.message; // Exibe mensagem de erro
-      }
-    } catch (error) {
-      console.error('Erro na requisição:', error);
-      document.getElementById("result").innerText = "Erro ao conectar com o servidor";
+    if (!username || !password) {
+        document.getElementById("result").innerText = "Por favor, preencha todos os campos.";
+        return;
     }
-  });
 
+    try {
+        const response = await fetch("https://task-game.onrender.com/users", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: username, password }),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            document.getElementById("result").innerText = "Usuário criado com sucesso!";
+        } else {
+            document.getElementById("result").innerText = "Erro: " + result.message;
+        }
+    } catch (error) {
+        console.error("Erro ao criar usuário:", error);
+        document.getElementById("result").innerText = "Erro ao conectar ao servidor.";
+    }
+});
 
 function validateLogin(event) {
     event.preventDefault(); // Evita o envio do formulário
