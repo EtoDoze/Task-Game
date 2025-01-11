@@ -20,6 +20,7 @@ document.getElementById("formulario").addEventListener("submit", async function(
         // Verifique se o login foi bem-sucedido
         if (result.success) {
             // Armazenar os dados do usuário no localStorage
+            window.location.href = "game.html"; 
             localStorage.setItem("user", JSON.stringify({
                 name: username,
                 exp: result.exp,
@@ -28,13 +29,14 @@ document.getElementById("formulario").addEventListener("submit", async function(
             }));
 
             // Redirecionar para o game.html
-            window.location.href = "game.html"; 
         } else {
             // Se o login falhar, exibir a mensagem de erro
+            document.getElementById("result").style.color = "red";
             document.getElementById("result").innerText = "Login falhou: " + result.message;
         }
     } catch (error) {
         // Caso haja erro de conexão ou outro tipo de erro
+        document.getElementById("result").style.color = "red";
         document.getElementById("result").innerText = "Erro ao tentar fazer login. Tente novamente mais tarde.";
         console.error(error); // Exibir o erro no console para depuração
     }
@@ -42,16 +44,19 @@ document.getElementById("formulario").addEventListener("submit", async function(
 
 
 
+
+
 // Função para criar um novo usuário
 document.getElementById("create").addEventListener("click", async function () {
     const username = document.getElementById("nome").value;
     const password = document.getElementById("senha").value;
-
+    
     if (!username || !password) {
+        document.getElementById("result").style.color = "red";
         document.getElementById("result").innerText = "Por favor, preencha todos os campos.";
         return;
     }
-
+    
     try {
         const response = await fetch("https://task-game.onrender.com/users", {
             method: "POST",
@@ -61,13 +66,28 @@ document.getElementById("create").addEventListener("click", async function () {
 
         const result = await response.json();
 
+        function random_rgba() {
+            var o = Math.round,
+            r = Math.random,
+            s = 255;
+            return 'rgba(' + o(r() * s) + ',' + o(r() * s) + ',' + o(r() * s) + ',' + r().toFixed(1) + ')';
+        };
+        
+        
         if (response.ok) {
+            document.getElementById("result").style.color = random_rgba();
             document.getElementById("result").innerText = "Usuário criado com sucesso!";
+        } else if (result.message === "Usuário já existe.") {
+            document.getElementById("result").style.color = "red";
+            document.getElementById("result").innerText = "Erro: Usuário já existe.";
         } else {
-            document.getElementById("result").innerText = "Erro: " + result.message;
+            document.getElementById("result").style.color = "red";
+            document.getElementById("result").innerText = "Erro ao criar usuário: " + result.message;
         }
+        
     } catch (error) {
         console.error("Erro ao criar usuário:", error);
+        document.getElementById("result").style.color = "red";
         document.getElementById("result").innerText = "Erro ao conectar ao servidor.";
     }
 });

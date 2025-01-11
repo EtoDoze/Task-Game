@@ -111,6 +111,32 @@ app.put("/updateUserData", async (req, res) => {
 });
 
 
+// Rota para deletar um usuário pelo ID
+app.delete('/users/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // Verifica se o usuário existe
+        const existingUser = await prisma.user.findUnique({
+            where: { id: parseInt(id) },
+        });
+
+        if (!existingUser) {
+            return res.status(404).json({ success: false, message: 'Usuário não encontrado.' });
+        }
+
+        // Deleta o usuário
+        await prisma.user.delete({
+            where: { id: parseInt(id) },
+        });
+
+        res.json({ success: true, message: 'Usuário deletado com sucesso.' });
+    } catch (error) {
+        console.error('Erro ao deletar usuário:', error.message);
+        res.status(500).json({ success: false, message: 'Erro ao deletar usuário.' });
+    }
+});
+
 
 // Iniciar o servidor
 const PORT = 3001;
