@@ -135,7 +135,7 @@ if (loginForm) {
 
 async function buscarUsuarioPorId(id) {
     try {
-        const response = await fetch(`http://localhost:3001/users/${id}`);
+        const response = await fetch(`https://task-game.onrender.com/users/${id}`);
         const user = await response.json();
 
         if (response.ok) {
@@ -154,7 +154,7 @@ async function buscarUsuarioPorId(id) {
 
 async function salvarDadosUsuario(id, dados) {
     try {
-        const response = await fetch(`http://localhost:3001/users/${id}/updateStats`, {
+        const response = await fetch(`https://task-game.onrender.com/users/${id}/updateStats`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
