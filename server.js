@@ -11,7 +11,10 @@ const { exec } = require("child_process");//
 
 // Executa as migrações no início do servidor
 const { execSync } = require("child_process");
-execSync("npx prisma migrate reset --force --skip-seed", { stdio: "inherit" });
+if (process.env.NODE_ENV !== "production") {
+    execSync("npx prisma migrate dev", { stdio: "inherit" });
+}
+
 
 
 try {
@@ -94,20 +97,22 @@ app.put('/users/:id/updateStats', async (req, res) => {
     const { id } = req.params;
     const { exp, level, ranking } = req.body;
 
+    if (exp == null || level == null || ranking == null) {
+        return res.status(400).json({ error: "Campos exp, level e ranking são obrigatórios." });
+    }
+
     try {
         const updatedUser = await prisma.user.update({
             where: { id: Number(id) },
-            data: {
-                exp,
-                level,
-                ranking
-            }
+            data: { exp, level, ranking }
         });
         res.json(updatedUser);
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao atualizar os dados do usuário.' });
+        console.error(error);
+        res.status(500).json({ error: "Erro ao atualizar os dados do usuário." });
     }
 });
+
 
 
 // Rota para buscar um usuário pelo ID

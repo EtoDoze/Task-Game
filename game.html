@@ -54,9 +54,16 @@
         
 
         const user = JSON.parse(localStorage.getItem("user"));
-        document.getElementById("expDisplay").innerText = `XP: ${user.exp}`;
-        document.getElementById("levelDisplay").innerText = `Nível: ${user.level}`;
-        document.getElementById("rankingDisplay").innerText = `Ranking: ${user.ranking}`;
+        if (user) {
+            document.getElementById("expDisplay").innerText = `XP: ${user.exp}`;
+            document.getElementById("levelDisplay").innerText = `Nível: ${user.level}`;
+            document.getElementById("rankingDisplay").innerText = `Ranking: ${user.ranking}`;
+        } else {
+            console.error("Usuário não encontrado no localStorage");
+            // Talvez redirecionar para login?
+            window.location.href = "index.html";
+        }
+        
 
 
         function addTask() {
@@ -123,7 +130,7 @@
         async function handleCheckboxChange(checkbox, index) {
             taskList[index].isChecked = checkbox.checked;
         
-            // Atualiza XP e nível com base no estado da checkbox
+            // Atualiza XP e nível localmente
             exp += checkbox.checked ? 10 : -10;
             if (exp >= 100) {
                 exp = 0;
@@ -131,18 +138,16 @@
             }
         
             // Atualiza ranking
-            if (level >= 100) ranking = "god";
-            else if (level >= 50) ranking = "mestre";
-            else if (level >= 20) ranking = "lenda";
-            else if (level >= 10) ranking = "estudioso";
-            else ranking = "noob";
+            ranking = level >= 100 ? "god" :
+                      level >= 50  ? "mestre" :
+                      level >= 20  ? "lenda" :
+                      level >= 10  ? "estudioso" : "noob";
         
-            // Atualiza elementos visuais
             document.getElementById("xp").innerText = exp;
             document.getElementById("lvl").innerText = level;
             document.getElementById("rank").innerText = ranking;
         
-            // Atualiza os dados no servidor
+            // Sincroniza com o servidor
             const user = JSON.parse(localStorage.getItem("user"));
             try {
                 const response = await fetch(`https://task-game.onrender.com/users/${user.id}/updateStats`, {
@@ -152,14 +157,16 @@
                 });
         
                 if (!response.ok) throw new Error("Erro ao atualizar os dados no servidor.");
-                console.log("Dados atualizados no servidor com sucesso!");
+                console.log("Dados atualizados no servidor.");
             } catch (error) {
                 console.error("Erro ao enviar atualização:", error);
             }
+        }
+        
         
             // Atualiza localStorage
-            localStorage.setItem("user", JSON.stringify({ ...user, exp, level, ranking }));
-        }
+           // localStorage.setItem("user", JSON.stringify({ ...user, exp, level, ranking }));//
+        
         
         
 
