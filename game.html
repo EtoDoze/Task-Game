@@ -27,21 +27,31 @@
         var exp = 0;
         var ranking = "noob";
 
-        window.addEventListener("load", () => {
+        window.addEventListener("load", async () => {
             const user = JSON.parse(localStorage.getItem("user"));
-            
+        
             if (user) {
-                // Carregar os dados do usuário
-                document.getElementById("lvl").innerText = user.level;
-                document.getElementById("xp").innerText = user.exp;
-                document.getElementById("rank").innerText = user.ranking;
-                
-                // Chama renderTasks agora que o DOM está carregado
-                renderTasks();
+                try {
+                    const response = await fetch(`https://task-game.onrender.com/users/${user.id}`);
+                    if (!response.ok) throw new Error("Erro ao carregar dados do servidor.");
+        
+                    const data = await response.json();
+        
+                    // Atualiza os elementos da página
+                    document.getElementById("lvl").innerText = data.level;
+                    document.getElementById("xp").innerText = data.exp;
+                    document.getElementById("rank").innerText = data.ranking;
+        
+                    // Atualiza localStorage com os dados mais recentes
+                    localStorage.setItem("user", JSON.stringify(data));
+                } catch (error) {
+                    console.error("Erro ao carregar dados:", error);
+                }
             } else {
-                window.location.href = "index.html";  // Se o usuário não estiver logado, redireciona
+                window.location.href = "index.html"; // Redireciona se não houver usuário logado
             }
         });
+        
 
         const user = JSON.parse(localStorage.getItem("user"));
         document.getElementById("expDisplay").innerText = `XP: ${user.exp}`;
@@ -110,76 +120,48 @@
             });
         }
 
-      async function handleCheckboxChange(checkbox, index) {
+        async function handleCheckboxChange(checkbox, index) {
             taskList[index].isChecked = checkbox.checked;
-
-            if (checkbox.checked) {
-                exp += 10; // Adiciona XP ao marcar a tarefa
-
-                try {
-                    const response = await fetch(`https://task-game.onrender.com/users/${user.id}/updateStats`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            exp: newExp,
-                            level: newLevel,
-                            ranking: newRanking
-                        }),
-                    });
-            
-                    if (!response.ok) {
-                        throw new Error('Erro ao atualizar no servidor.');
-                    }
-                    else{
-                    console.log('Estatísticas atualizadas no servidor!');
-                    }
-                } catch (error) {
-                    console.error('Erro ao enviar estatísticas:', error);
-                }
-            
-            } else {
-                exp -= 10; // Remove XP ao desmarcar
-            }
-
+        
+            // Atualiza XP e nível com base no estado da checkbox
+            exp += checkbox.checked ? 10 : -10;
             if (exp >= 100) {
                 exp = 0;
-                level++; // Aumenta o nível
+                level++;
             }
-
+        
+            // Atualiza ranking
+            if (level >= 100) ranking = "god";
+            else if (level >= 50) ranking = "mestre";
+            else if (level >= 20) ranking = "lenda";
+            else if (level >= 10) ranking = "estudioso";
+            else ranking = "noob";
+        
+            // Atualiza elementos visuais
             document.getElementById("xp").innerText = exp;
             document.getElementById("lvl").innerText = level;
-            updateRanking();
-
-            // Atualiza o ranking com base no level
-            function updateRanking() {
-                if (level >= 100) ranking = "god";
-                else if (level >= 50) ranking = "mestre";
-                else if (level >= 20) ranking = "lenda";
-                else if (level >= 10) ranking = "estudioso";
-                else ranking = "noob";
-
-                document.getElementById("rank").innerText = ranking;
-            }
-
+            document.getElementById("rank").innerText = ranking;
+        
+            // Atualiza os dados no servidor
             const user = JSON.parse(localStorage.getItem("user"));
-            fetch("https://task-game.onrender.com/updateUserData", {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    name: user.name,
-                    exp: exp,
-                    level: level,
-                    ranking: ranking
-                })
-            }).then(response => response.json())
-              .then(data => {
-                  console.log("Dados atualizados:", data);
-              });
-
-            renderTasks(); // Atualiza a interface com o estado das checkboxes
+            try {
+                const response = await fetch(`https://task-game.onrender.com/users/${user.id}/updateStats`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ exp, level, ranking }),
+                });
+        
+                if (!response.ok) throw new Error("Erro ao atualizar os dados no servidor.");
+                console.log("Dados atualizados no servidor com sucesso!");
+            } catch (error) {
+                console.error("Erro ao enviar atualização:", error);
+            }
+        
+            // Atualiza localStorage
+            localStorage.setItem("user", JSON.stringify({ ...user, exp, level, ranking }));
         }
+        
+        
 
         function toggleEdit(index) {
             taskList[index].isEditing = !taskList[index].isEditing;

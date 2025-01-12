@@ -21,6 +21,7 @@ document.getElementById("formulario").addEventListener("submit", async function(
         if (result.success) {
             // Armazenar os dados do usuário no localStorage
             window.location.href = "game.html"; 
+            
             localStorage.setItem("user", JSON.stringify({
                 name: username,
                 exp: result.exp,
@@ -131,5 +132,50 @@ const loginForm = document.getElementById("loginForm");
 if (loginForm) {
     loginForm.addEventListener("submit", validateLogin);
 }
+
+async function buscarUsuarioPorId(id) {
+    try {
+        const response = await fetch(`http://localhost:3001/users/${id}`);
+        const user = await response.json();
+
+        if (response.ok) {
+            console.log("Usuário encontrado:", user);
+            document.getElementById("result").innerText = 
+                `Usuário: ${user.name}, Exp: ${user.exp}, Level: ${user.level}, Ranking: ${user.ranking}`;
+        } else {
+            console.error("Erro ao buscar usuário:", user.message);
+            document.getElementById("result").innerText = user.message;
+        }
+    } catch (error) {
+        console.error("Erro na requisição:", error);
+    }
+}
+
+
+async function salvarDadosUsuario(id, dados) {
+    try {
+        const response = await fetch(`http://localhost:3001/users/${id}/updateStats`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dados)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            console.log("Usuário atualizado:", result);
+            document.getElementById("result").innerText = 
+                `Dados atualizados: Exp: ${result.exp}, Level: ${result.level}, Ranking: ${result.ranking}`;
+        } else {
+            console.error("Erro ao atualizar usuário:", result.error);
+            document.getElementById("result").innerText = result.error;
+        }
+    } catch (error) {
+        console.error("Erro na requisição:", error);
+    }
+}
+
 
 // A função `loadUserData()` será chamada no game.html para garantir que o usuário está logado e exibir suas informações.

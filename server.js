@@ -90,25 +90,46 @@ app.post("/login", async (req, res) => {
 
 
 // Rota para atualizar os dados do usuário
-app.put("/updateUserData", async (req, res) => {
-    const { name, exp, level, ranking } = req.body;
+app.put('/users/:id/updateStats', async (req, res) => {
+    const { id } = req.params;
+    const { exp, level, ranking } = req.body;
 
     try {
         const updatedUser = await prisma.user.update({
-            where: { name: name },
+            where: { id: Number(id) },
             data: {
-                exp,  // Atualiza o XP
-                level,  // Atualiza o nível
-                ranking  // Atualiza o ranking
+                exp,
+                level,
+                ranking
             }
         });
-
         res.json(updatedUser);
     } catch (error) {
-        console.error("Erro ao atualizar dados do usuário:", error);
-        res.status(500).json({ success: false, message: "Erro ao atualizar os dados." });
+        res.status(500).json({ error: 'Erro ao atualizar os dados do usuário.' });
     }
 });
+
+
+// Rota para buscar um usuário pelo ID
+app.get('/users/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: Number(id) }
+        });
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'Usuário não encontrado.' });
+        }
+
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Erro ao buscar usuário.' });
+    }
+});
+
+
 
 
 // Rota para deletar um usuário pelo ID
