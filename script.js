@@ -4,6 +4,7 @@ document.getElementById("formulario").addEventListener("submit", async function(
 
     const username = document.getElementById("nome").value;
     const password = document.getElementById("senha").value;
+    const EmailInp = document.getElementById("EmailInput").value;
     
     // Aqui você pode ajustar a URL para o endpoint correto da sua API de login
     try {
@@ -19,18 +20,18 @@ document.getElementById("formulario").addEventListener("submit", async function(
 
         // Verifique se o login foi bem-sucedido
         if (result.success) {
-            // Armazenar os dados do usuário no localStorage
-            window.location.href = "game.html"; 
-            
             localStorage.setItem("user", JSON.stringify({
+                id: result.id, // Garanta que o ID está incluído
                 name: username,
                 exp: result.exp,
                 level: result.level,
                 ranking: result.ranking
             }));
-
+            window.location.href = "game.html";
+        }
+        
             // Redirecionar para o game.html
-        } else {
+        else {
             // Se o login falhar, exibir a mensagem de erro
             document.getElementById("result").style.color = "red";
             document.getElementById("result").innerText = "Login falhou: " + result.message;
@@ -51,6 +52,17 @@ document.getElementById("formulario").addEventListener("submit", async function(
 document.getElementById("create").addEventListener("click", async function () {
     const username = document.getElementById("nome").value;
     const password = document.getElementById("senha").value;
+    const EmailInp = document.getElementById("EmailInput").value;
+
+    //validar Email
+    const validaemail = (email) => {
+        const regex = /^[^\s]+@[^\s]+\.[^\s]+$/;
+        return regex.test(email);
+    }
+
+    const isValid = validaemail(email);
+    if(isValid){document.getElementById("result").innerText = "Email valido"; document.getElementById("result").style.color = "red";}
+    else{document.getElementById("result").innerText = "Email invalido"; document.getElementById("result").style.color = "red";}
     
     if (!username || !password) {
         document.getElementById("result").style.color = "red";
@@ -111,14 +123,11 @@ function validateLogin(event) {
     }
 }
 
-// Função para carregar o nome do usuário e a saudação no game.html
-function loadUserData() {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (user) {
-        document.getElementById("userGreeting").innerText = `Bem-vindo, ${user.name}!`;
-    } else {
-        window.location.href = "index.html"; // Se o usuário não estiver logado, redireciona para a página de login
-    }
+
+
+const user = JSON.parse(localStorage.getItem("user"));
+if (!user || !user.id) {
+ //   window.location.href = "index.html"; // Redirecionar se não estiver logado
 }
 
 // Função de logout
