@@ -52,7 +52,7 @@ document.getElementById("formulario").addEventListener("submit", async function(
 document.getElementById("create").addEventListener("click", async function () {
     const username = document.getElementById("nome").value;
     const password = document.getElementById("senha").value;
-    const EmailInp = document.getElementById("EmailInput").value;
+    const Email = document.getElementById("EmailInput").value;
 
     //validar Email
     const validaemail = (email) => {
@@ -60,9 +60,9 @@ document.getElementById("create").addEventListener("click", async function () {
         return regex.test(email);
     }
 
-    const isValid = validaemail(email);
-    if(isValid){document.getElementById("result").innerText = "Email valido"; document.getElementById("result").style.color = "red";}
-    else{document.getElementById("result").innerText = "Email invalido"; document.getElementById("result").style.color = "red";}
+    const isValid = validaemail(Email);
+    if(isValid){document.getElementById("result").innerText = "Email valido"; document.getElementById("result").style.color = "red"}
+    else{document.getElementById("result").innerText = "Email invalido"; document.getElementById("result").style.color = "red"}
     
     if (!username || !password) {
         document.getElementById("result").style.color = "red";
@@ -74,7 +74,7 @@ document.getElementById("create").addEventListener("click", async function () {
         const response = await fetch("https://task-game.onrender.com/users", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name: username, password }),
+            body: JSON.stringify({ name: username, password, E_mail: Email}),
         });
 
         const result = await response.json();
