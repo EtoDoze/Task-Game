@@ -61,7 +61,7 @@ document.getElementById("create").addEventListener("click", async function () {
     }
 
     const isValid = validaemail(Email);
-    if(isValid){document.getElementById("result").innerText = "Email valido"; document.getElementById("result").style.color = "red"}
+    if(isValid){document.getElementById("result").innerText = "Email valido"; document.getElementById("result").style.color = "green"}
     else{document.getElementById("result").innerText = "Email invalido"; document.getElementById("result").style.color = "red"}
     
     if (!username || !password) {

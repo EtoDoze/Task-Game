@@ -16,7 +16,7 @@ datasource db {
 model User {
   id       Int    @id @default(autoincrement())
   name     String
-  E_mail  String @unique
+  E_mail  String @default("null@gmail.com.br")
   password String
   exp      Int    @default(0)
   level    Int    @default(0)
